@@ -237,71 +237,170 @@ python -m venv venv
 source venv/bin/activate  # or venv\Scripts\activate on Windows
 
 # Install dependencies
-pip install geosquare geopandas pandas matplotlib seaborn rasterio fiona pyrosm playwright
-pip install openrouter  # for AI vision OCR
-playwright install chromium  # for web scraping
+pip install -r requirements.txt
+
+# For web scraping (optional)
+playwright install chromium
 ```
+
+### 🚀 Quick Start Guide
+
+**Running Order**:
+1. ✅ **Phase 1**: Local Python scripts (download data)
+2. ☁️ **Phase 2**: Google Earth Engine Code Editor (satellite processing) + Local validation notebook
+3. ✅ **Phase 3**: Local Jupyter notebook (dasymetric mapping)
+4. ✅ **Phase 4**: Local Jupyter notebook (grid integration)
+5. ✅ **Phase 5**: Local Python scripts (visualizations) + LaTeX (final memo)
+
+**Key Distinction**:
+- **Phases 1, 3, 4, 5**: Run locally with Python
+- **Phase 2 satellite export**: Runs in Google Earth Engine Code Editor (cloud)
+- **Phase 2 validation**: Runs locally as Jupyter notebook
+
+---
+
+### 📥 Data Download Requirements
+
+Some datasets require download before running the analysis. Follow these steps:
+
+#### 1. BNPB Disaster Risk Data (Required)
+```bash
+cd phase1_data_hunt/bnpb/
+python download_risk_bnpb.py
+```
+This downloads 6 hazard TIF files (~540 MB total) from Google Drive. The script automatically handles extraction and nested folder issues.
+
+**Alternative**: If automatic download fails, see [phase1_data_hunt/bnpb/README_DOWNLOAD.md](phase1_data_hunt/bnpb/README_DOWNLOAD.md) for manual download instructions.
+
+#### 2. Administrative Boundaries (Required)
+```bash
+cd phase1_data_hunt/boundaries/
+python download_gdb.py
+```
+This validates existing boundary files. GeoJSON files are already included in the repository, so **no additional download is needed**.
+
+**Optional**: For GDB format, see [phase1_data_hunt/boundaries/README_DOWNLOAD_GDB.md](phase1_data_hunt/boundaries/README_DOWNLOAD_GDB.md) for manual download from OneDrive.
+
+#### 3. Indonesia OSM PBF (Auto-detected)
+```bash
+cd phase1_data_hunt/osm/
+python extract_osm_data.py
+```
+The script will automatically detect existing `indonesia-*.osm.pbf` files or download the latest from Geofabrik (~1.6 GB).
+
+**Note**: All download scripts handle nested folder extraction automatically.
+
+---
 
 ### Run Analysis (Sequential)
 
 #### Phase 1: Data Hunt
+
+**Step 1.1: Download BNPB Risk Data**
 ```bash
-cd phase1_data_hunt/
+cd phase1_data_hunt/bnpb/
+python download_risk_bnpb.py        # Downloads 6 hazard TIF files from Google Drive
+cd ..
+```
 
-# Population data
-python population/tablue-scraper.py        # Tangsel Disdukcapil (requires Playwright)
-python population/vision_ocr.py            # OKU vision OCR (requires OpenRouter API key)
+**Step 1.2: Validate Boundary Data**
+```bash
+cd boundaries/
+python download_gdb.py              # Validates GeoJSON boundaries (already included)
+cd ..
+```
 
-# RTRW zoning
-python rtrw/download_rtrw.py               # Download from BIG SatuPeta API
+**Step 1.3: Extract OpenStreetMap Data**
+```bash
+cd osm/
+python extract_osm_data.py          # Auto-detects PBF or downloads from Geofabrik
+cd ..
+```
 
-# Administrative boundaries
-python boundaries/extract_boundaries_from_gdb.py  # Extract from RBI10K Geodatabase
+**Step 1.4: Download RTRW Zoning** (Optional - data already included)
+```bash
+cd rtrw/
+python download_rtrw.py             # Download from BIG SatuPeta API
+cd ..
+```
 
-# OpenStreetMap
-python osm/extract_osm_data.py             # Extract POI, buildings, roads from PBF
-
-# BNPB hazards
-python bnpb/risk_bnpb.py                   # Download hazard rasters from BNPB
+**Step 1.5: Population Data** (Optional - requires API keys)
+```bash
+cd population/
+python tablue-scraper.py            # Tangsel Disdukcapil (requires Playwright)
+python vision_ocr.py                # OKU vision OCR (requires OpenRouter API key)
+cd ..
 ```
 
 #### Phase 2: Satellite Processing
+
+**⚠️ IMPORTANT**: Phase 2 runs entirely in **Google Earth Engine Code Editor** (not local Python).
+
+**Step 2.1: Export Satellite Data in GEE**
+1. Open [Google Earth Engine Code Editor](https://code.earthengine.google.com/)
+2. Load and run these scripts:
+   - `phase2_satellite/scripts/gee_lulc_random_forest.js` - LULC classification (ESA WorldCover)
+   - `phase2_satellite/scripts/gee_viirs_nightlights.js` - Night lights export (VIIRS 2020-2025)
+3. Export results to Google Drive, then download to:
+   - `phase2_satellite/data/lulc/` (LULC TIF files)
+   - `phase2_satellite/data/nightlights/` (night lights TIF files)
+
+**Step 2.2: RTRW Validation** (Local Python)
 ```bash
-cd ../phase2_satellite/
-
-# Google Earth Engine (run in GEE Code Editor)
-# - scripts/gee_lulc_random_forest.js      # LULC classification
-# - scripts/gee_viirs_nightlights.js       # Night lights export
-
-# RTRW validation
-jupyter notebook rtrw_validation/comparison_pola_ruang.ipynb  # Run all cells
+cd phase2_satellite/rtrw_validation/
+jupyter notebook comparison_pola_ruang.ipynb  # Run all cells
+cd ../..
 ```
 
 #### Phase 3: Dasymetric Mapping
+
+**Step 3.1: Population Disaggregation**
 ```bash
-cd ../phase3_dasymetric/
-jupyter notebook dasymetric_mapping.ipynb  # Population disaggregation
+cd phase3_dasymetric/
+jupyter notebook dasymetric_mapping.ipynb
 ```
+Run all cells to disaggregate census data to 50m × 50m grids using LULC weights (Stevens et al. 2015 methodology).
+
+**Outputs**: Population grids saved to `outputs/`
 
 #### Phase 4: Grid Integration
+
+**Step 4.1: Integrate All Data Layers**
 ```bash
 cd ../phase4_grid_integration/
-jupyter notebook grid_data_integration.ipynb  # All layers → grid (produces CSV)
-python export_grid_formats.py                 # Optional: CSV → GeoJSON/Parquet
+jupyter notebook grid_data_integration.ipynb
+```
+Run all cells to merge all 8 data layers into geosquare grid system (Level 12, 50m × 50m).
+
+**Step 4.2: Export Grid Formats** (Optional)
+```bash
+python export_grid_formats.py  # Convert CSV → GeoJSON/Parquet
 ```
 
+**Outputs**:
+- `outputs/grid_tangsel_integrated.parquet` (67K grids)
+- `outputs/grid_oku_integrated.parquet` (1.5M grids)
+
 #### Phase 5: Investment Analysis
+
+**Step 5.1: Generate Visualizations**
 ```bash
 cd ../phase5_investment_memo/
 
-# Generate visualizations
-python scripts/generate_grid_maps.py          # Land use, population, night lights maps
-python scripts/generate_business_gap.py       # Business gap analysis chart
-
-# Compile investment memo
-cd latex/
-pdflatex oku_investment_memo.tex              # Generates final PDF
+python scripts/generate_grid_maps.py         # 8 maps: land use, population, night lights, hazards
+python scripts/generate_business_gap.py      # Business gap analysis chart
 ```
+
+**Step 5.2: Compile Investment Memo**
+```bash
+cd latex/
+pdflatex oku_investment_memo.tex             # Generates 2-page PDF deliverable
+```
+
+**Outputs**:
+- `latex/oku_investment_memo.pdf` ⭐ **MAIN DELIVERABLE**
+- `outputs/maps/*.png` (8 visualization maps)
+- `business_gap_analysis/outputs/business_gap_analysis.png`
 
 ### Outputs
 **Phase 4**:
