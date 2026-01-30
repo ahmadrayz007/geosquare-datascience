@@ -1,0 +1,71 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# Large data files
+# *.pbf
+*.tif
+*.tiff
+*.geotiff
+
+# Geospatial data (keep only metadata/configs)
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.qpj
+
+# Outputs (can be regenerated)
+*/outputs/*.geojson
+*/outputs/*.csv
+*/outputs/*.png
+*/outputs/*.pdf
+
+# Phase 4 outputs (integrated grids - can be regenerated)
+phase4_grid_integration/outputs
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.bak
+
+# Temporary files
+*.tmp
+*.log
+
+# Exceptions: Keep small example files or critical configs
+!example_data/
+!*/README.md

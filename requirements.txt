@@ -1,0 +1,32 @@
+# Geosquare Data Science Challenge - Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# Core geospatial libraries
+geopandas>=0.14.0
+geosquare-grid>=0.1.0
+rasterio>=1.3.0
+pyrosm>=0.6.0
+
+# Data manipulation
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Visualization
+matplotlib>=3.7.0
+
+# Web scraping and downloads
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+tqdm>=4.66.0
+
+# Utilities
+pathlib>=1.0.0
+
+# Optional but recommended
+jupyter>=1.0.0
+notebook>=7.0.0
+
+# Command-line tools (install separately via system package manager):
+# - osmium-tool (for PBF file manipulation)
+#   Ubuntu/Debian: sudo apt-get install osmium-tool
+#   macOS: brew install osmium-tool
