@@ -1,7 +1,7 @@
 # Geosquare.ai Hiring Challenge Submission
 ## "Invisible Market" Challenge - Spatial Data Scientist Position
 
-**Candidate**: Leon K.
+**Candidate**: Ahmad Rayis
 **Submission Date**: January 23, 2026
 **Contact**: ahmadrayz007@gmail.com
 **Challenge**: Grid-Based Investment Analysis - Tangerang Selatan vs Ogan Komering Ulu
